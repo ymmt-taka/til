@@ -1,0 +1,56 @@
+Dockerコンテナの立ち上げ
+
+```
+$ docker compose build
+
+$ docker compose up
+```
+
+gem・JavaScriptパッケージをインストール
+
+```
+$ docker compose run web bundle install
+
+$ docker compose run web yarn install
+```
+
+データベースの初期化・マイグレーション適応
+
+```
+$ docker compose exec web rails db:create
+
+# 以下は課題を取り組んでいる中でデータベースを初期化する必要になった際に実行してください。
+$ docker compose exec web rails db:drop
+$ docker compose exec web rails db:create
+$ docker compose exec web rails db:migrate
+```
+
+CSS,JavaScript用のサーバー起動
+
+```
+$ docker compose exec web bin/dev
+```
+
+```
+$ docker compose up
+# ↑を立ち上げたターミナル1（コンテナを立ち上げた状態にする）
+
+$ docker compose exec web bin/dev
+# ↑を立ち上げたターミナル2（CSS,JavaScript用のサーバーを立ち上げた状態にする）
+
+# ターミナル1と2を立ち上げた状態で、ターミナル3を立ち上げる。
+ターミナル3：Git操作やコマンドを実行する用のターミナル
+
+```
+
+Dockerコンテナを終了するための操作
+
+```
+$ docker compose down
+```
+
+- 入力したらダメ（自動レビューが正しく動かなくなるかも）
+    
+    ```
+    $ bundle update
+    ```
