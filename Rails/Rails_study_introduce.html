@@ -1,0 +1,76 @@
+# rails gコマンド
+
+Dockerを使用してRailsアプリケーションを開発する場合、Railsのgeneratorを介してファイルを生成するコマンド。
+
+`rails g model`：新しいモデルとマイグレーションファイルを生成
+
+`rails g migration`：データベースの変更を行う新しいマイグレーションを生成する。
+
+`rails g controler`：新しいコントローラとビューファイルを生成
+
+`docker compose exec web rails model` ：Dockerコンテナ内のRailsアプリケーションで、Railsのgeneratorを使って新しいモデルを作成するコマンド。モデルはMVCフレームワークの中で、データの処理を担当する部分。
+このコマンドを実行するとapp/modelsディレクトリに○○.rbというファイルが生成される。同時にdb/migrateディレクトリ配下にデータベースのテーブル構造を定義するマイグレーションファイルも生成される。
+
+`docker compose exec web rails g migration` ：Dockerコンテナ内のRailsアプリケーション。Railsのgeneratorを使ってマイグレーションを生成するコマンド。`model`のコマンドでもマイグレーションファイルが作成されるが、モデルと対でない場合（カラムを追加したい・カラム名を変更したい等）で使用する。
+
+マイグレーションファイルに必要な変更をした後、
+`docker compose exec web rails db:migrate` を実行して変更をデータベースに適用する。
+
+`docker compose exec web rails g controller` ：Railsのgeneratorを使ってコントローラーファイルを生成するコマンド。
+
+config/application.rbの編集：不要なファイルを作らないようにする！
+
+g.skip_routes true：ルーティングの記述を加えないようにする設定
+
+g.helper false：ヘルパーファイルを自動生成しないようにする設定
+
+g.test_framework nil：テストフレームワークを使わないようにする設定。
+
+Lint：コードの品質やスタイルをチェックするツール。Rubyの場合はRubocop
+
+Rubocopを使用してエラーメッセージが出た場合、AI講師に以下のように聞いてみる
+
+├── app                                # アプリケーションに関わるディレクトリ
+│   ├── assets                         # アセット（画像やスタイルシートetc）に関わるディレクトリ
+│   │   ├── images                     # 画像ファイルに関するディレクトリ
+│   │   └── stylesheets                # スタイルシートに関するディレクトリ
+│   ├── controllers                    # コントローラーに関するディレクトリ
+│   ├── helpers                        # 主にビューの共通処理を定義するヘルパーファイルに関するディレクトリ
+│   ├── javascript                     # JavaScriptに関するディレクトリ
+│   ├── mailers                        # ActionMailerに関するディレクトリ
+│   ├── models                         # モデルに関するディレクトリ
+│   └── views                          # ビューに関するディレクトリ
+│       ├── layouts                    # レイアウトに関するディレクトリ
+│       │   ├── application.html.erb   # ビューに関するレイアウトファイル
+│       │   ├── mailer.html.erb        # HTMLメールのレイアウトファイル
+│       │   └── mailer.text.erb        # TEXTメールのレイアウトファイル
+│       └── ...s                       # XxxxsControllerに対応するビューに関するディレクトリ
+│           ├── _xxxxx.html.erb        # パーシャルテンプレートファイル（他のビューファイルから呼び出されるファイル）
+│           ├── edit.html.erb          # XxxxsControllerのeditアクションに対応するビューファイル
+│           ├── index.html.erb         # XxxxsControllerのindexアクションに対応するビューファイル
+│           ├── new.html.erb           # XxxxsControllerのnewアクションに対応するビューファイル
+│           └── show.html.erb          # XxxxsControllerのshowアクションに対応するビューファイル
+├── config                             # アプリケーションの設定に関するディレクトリ
+│   ├── ... 省略 ...
+│   ├── database.yml                   # データベースに接続するための設定ファイル
+│   ├── environment.rb                 # サーバー起動時の設定ファイル
+│   ├── environments                   # 開発環境毎の設定に関するディレクトリ
+│   │   ├── development.rb             # 開発環境の設定ファイル
+│   │   ├── production.rb              # 本番環境の設定ファイル
+│   │   └── test.rb                    # テスト環境の設定ファイル
+│   ├── initializers                   # アプリケーション起動時の初期設定に関するディレクトリ
+│   ├── locales                        # 多言語対応に関するディレクトリ
+│   └── routes.rb                      # ルーティングに関する設定ファイル
+├── db                                 # データベースに関するディレクトリ
+│   ├── migrate                        # マイグレーションファイルに関するディレクトリ
+│   ├── schema.rb                      # 現状のデータベースに反映されているテーブル構成の写しファイル
+│   └── seeds.rb                       # seedデータに関するファイル
+├── ... 省略 ...
+├── public                             # 静的ファイルに関するディレクトリ
+├── spec                               # RSpec（テスト）に関するディレクトリ
+├── .gitignore                         # .gitignoreの設定ファイル
+├── docker-compose.yml                 # Dockerイメージを組み合わせてコンテナを実行する
+├── Dockerfile                         # Dockerイメージを構築するファイル
+├── Gemfile                            # 必要なGemをリスト化したファイル
+├── Gemfile.lock                       # インストール済みGemのバージョン管理ファイル
+└── README.md                          # プロジェクト概要や環境構築の方法などが書かれたファイル
