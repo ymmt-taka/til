@@ -1,0 +1,300 @@
+## CRUD
+
+データベース管理システムに必要とされる４つの機能
+
+- 「作成（Create）」
+新しいデータをデータベースに追加する操作。
+SQLではINSERT文を使う。
+- 「読み出し（Read）」
+既存のデータを取得・閲覧する操作。データを検索したり、データを一覧表示する際に使用。
+SQLではSELECT文を使う。
+- 「更新（Update）」
+既存のデータを修正する操作。顧客の住所変更や商品価格の改定で使用。
+SQLではUPDATE文を使用。
+- 「削除（Delete）」
+不要になったデータを削除する。
+SQLではDELETE文が使用される。
+
+## Ruby on Railsにおける７つのアクション
+
+index,new,create,edit,show,update,destroyの７つ
+
+```
+- index：一覧表示
+- new：新規画面表示
+- create：新しいレコードを作成する
+- edit：編集画面表示
+- show：詳細画面表示
+- update：レコード内容を更新する
+- destroy：レコードを削除する
+```
+
+CRUD機能の実装
+
+- 開発の初期で素早くプロトタイプを作成するのには便利だが、現場では使用されないことが多い
+    - 生成されたコードがプロジェクトの要件と完全に一致しないことが多い。
+    - カスタマイズが必要な場合生成されたコードを修正する手間がかかる。
+    - 不要なコードやファイルが生成される可能性がある。
+    - 予期せぬ箇所にバグや攻撃を受けるリスクがある。
+
+```
+$ docker compose exec web bin/rails generate scaffold user name:string age:integer
+
+# 基本的なCRUD機能を持つリソースを生成するコマンド
+・モデル
+・マイグレーションファイル
+・コントローラ
+・ビュー（index, show, new, editなど）
+・ルーティング設定
+・テストファイル
+・ヘルパーファイル
+が生成される。
+```
+
+具体的には以下のディレクトリ・ファイルが実行される
+
+```
+.
+├── app
+│   ├── controllers
+│   │   └── users_controller.rb
+│   ├── helpers
+│   │   └── users_helper.rb
+│   ├── models
+│   │   └── user.rb
+│   └── views
+│       └── users
+│           ├── index.json.jbuilder
+│           ├── index.html.erb
+│           ├── edit.html.erb
+│           ├── show.json.jbuilder
+│           ├── show.html.erb
+│           ├── new.html.erb
+│           ├── _form.html.erb
+│           ├── _user.json.jbuilder
+│           └── _user.html.erb
+├── db
+│   └── migrate
+│           └── 20yymmddxxxxxx_create_users.rb
+└── spec
+    ├── factories
+    │   └── users.rb
+    ├── helpers
+    │   └── users_helper_spec.rb
+    ├── models
+    │   └── user_spec.rb
+    ├── requests
+    │   └── users_spec.rb
+    ├── routing
+    │   └── users_routing_spec.rb
+    └── views
+         └── users
+             ├── edit.html.erb_spec.rb
+             ├── index.html.erb_spec.rb
+             ├── new.html.erb_spec.rb
+             └── show.html.erb_spec.rb
+```
+
+データベースにマイグレーションファイルを適用
+
+```
+$ docker compose exec web bin/rails db:migrate
+# マイグレーションを実行する。changeまたはupメソッドを実行する。
+
+$ docker compose exec web bin/rails db:migrate:status   （マイグレーションファイルの適応状況を表示するコマンドです）
+```
+
+編集権限の変更（Windowsのみ）
+
+マイグレーションコマンドで生成したファイルの権限を変更する必要がある。
+
+```
+$ sudo chown -R $USER ./
+```
+
+- HTMLファイルの例とコードの解説
+    
+    ```html
+    <!DOCTYPE html>
+    <html>
+      <head>
+        ... 省略 ...
+      </head>
+    
+      <body>
+        ... 省略 ...
+    
+        <div class="container-fluid">
+          <div class="row">
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+              <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+                  <li class="nav-item">
+                    <%= link_to 'トップ', root_path, class: 'nav-link active', 'aria-current': 'page' %>
+                    <%= link_to 'ユーザー', users_path, class: 'nav-link active', 'aria-current': 'page' %>
+                  </li>
+                </ul>
+              </div>
+            </nav>
+    
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+              <%= yield %>
+            </main>
+          </div>
+        </div>
+      </body>
+    </html>
+    ```
+    
+    `link_to`はリンクを作成するためのヘルパーメソッド。HTMLのaタグの代わりに使用できます。
+    
+    `link_to`の第1引数はリンクのテキスト、第2引数はパスやURLを指定、第3引数はハッシュでmethodオプションや属性を指定できる
+    
+    `button_to` ボタンを簡単に作成することができるヘルパーメソッド
+    
+    `button_to` 第1引数はボタンに表示されるテキスト、第2引数はボタンをクリックしたときに動くアクションを指定するコード、第3引数はオプションを指定
+    
+
+Railsのルートページ：http://localhost:3000/
+
+（localhost:3000がローカルホストの場合）
+
+- 「ユーザー」のリンクをクリックすると👇のログが出る
+    
+    ```
+    Started GET "/users" for 192.168.65.1 at 2024-09-11 18:57:43 +0900
+    Cannot render console from 192.168.65.1! Allowed networks: 127.0.0.0/127.255.255.255, ::1
+    Processing by UsersController#index as HTML
+      Rendering layout layouts/application.html.erb
+      Rendering users/index.html.erb within layouts/application
+      User Load (0.6ms)  SELECT `users`.* FROM `users`
+      ↳ app/views/users/index.html.erb:6
+      Rendered users/index.html.erb within layouts/application (Duration: 2.8ms | Allocations: 795)
+      Rendered layout layouts/application.html.erb (Duration: 7.4ms | Allocations: 3212)
+    Completed 200 OK in 9ms (Views: 7.4ms | ActiveRecord: 0.6ms | Allocations: 3470)
+    ```
+    
+    Startedの直後にあるのはHTTPメソッドのGET
+    そのあとの”/users”はリクエスト先のURL
+    この2つの情報をルーティングが受け取ると、ルーティングがconfig/routes.rbに定義されている内容を参照し、どのコントローラーを動かすか指示する。config/routes.rbに定義されている中身を確認する場合はhttp://localhost:3000/rails/info/routes
+    
+    にアクセスする。
+    
+    ![image.png](attachment:9ce48ea6-a02b-441d-8b29-5177ab626a3f:image.png)
+    
+    ![image.png](attachment:078d6b75-bf27-4027-b935-4b3e96c5eb7f:image.png)
+    
+    GETで/usersへのリクエストに対応するコントローラーとアクションを確認すると、users#index（users_controllerのindexアクションのこと）であることが分かる
+    
+    ![image.png](attachment:19973d2e-11d3-4541-9873-c03a8c8cc0a9:image.png)
+    
+    app/controller/users_controller.rbのindexアクションの中身をみると、右辺でUser.allを実行したものをインスタンス変数@userに代入している
+    
+    ![image.png](attachment:d050b3e5-324b-4e80-8df8-4177ab60ada8:image.png)
+    
+    右辺のUserはapp/models/配下にあるuser.rbになる。
+    UserはApplicationRecordを継承しているから、
+    all, find, find_by, where, first, last, save, new, update, destroyなど
+    ApplicationRecordに備わっているメソッドを使用できる
+    
+    ![image.png](attachment:94cad04a-393d-4588-91eb-d40a990e880e:image.png)
+    
+    ビューは、ルーティングで支持されたコントローラーとアクションに対応するビューが使用される。users_controllerのindexアクションなので、app/views/配下にあるusersディレクトリ配下のindex.html.rbが使用される。
+    
+    ![image.png](attachment:fba1ab9c-a21f-4782-88be-8e1da714c635:image.png)
+    
+    index.html.rbの6行目にある@usersがusers_controllerのindexアクションから渡された@usersと同一のものになる。
+    Usersテーブルから取得した全てのデータをeachを使って繰り返し処理をして、1つ1つのデータを取り扱う。
+    1つ1つのデータを取り扱い、render userを記載してnameとageの値を表示させている。
+    `<% %>　と　<%= %>` でRubyコードが使える
+    イコール(=)がついているものは、ブラウザ上で表示される
+    ついていないものは、表示されない。
+    eachの1行は表示させる必要がないのでイコールがついていない。
+    👇表示させる場合は`<%= %>`を付ける
+    
+    ![image.png](attachment:0a92a242-ffd0-49ff-9c7f-b8e4a034e985:image.png)
+    
+
+### showアクション（コードのみ）
+
+![image.png](attachment:f9a536ac-3648-4c6f-8cbc-5e60cdc81c82:image.png)
+
+users_controllerのshowアクションがルーティング指示されたとき`before_action`が指定されたアクションの前に実行される。`before_action :set_user` は only指定が定義されている `show, edit, update, destroy`アクションが実行される前に実行される。
+
+![image.png](attachment:06310b25-d9ef-48f6-92cf-2c99d4054322:image.png)
+
+set_userのメソッドを見ると、左辺の User.find(params[:id]) でリクエストのURLに含まれる id の値を元に Usersテーブルから id の値と一致するレコードを1つ取得している。その取得したデータを @user というインスタンス変数に格納している。
+
+![image.png](attachment:11120ae4-bcdc-4a07-a18a-7b75b48108ea:image.png)
+
+@user というインスタンス変数にデータを格納したことによって、users_controllerのshowアクションに対応するビュー（app/views/users/show.html.erb）を使ってHTMLを作る際に、そのデータを活用することができます。具体的には以下の3箇所に値を渡しています。
+
+- `<%= render @user %>`
+- `<%= link_to "Edit this user", edit_user_path(@user) %> |`
+- `<%= button_to "Destroy this user", @user, method: :delete %>`
+
+1つ目の `<%= render @user %>` の部分ですが、indexアクションでも触れた `render` を使って、`@user` の値を app/views/users/_user.html.erb ファイル内の `user` という変数にバケツリレーのように渡しています。そのため、app/views/users/_user.html.erb 内の`<%= %>`の部分で、Usersテーブルから取得したレコードの nameの値、ageの値を表示させてます。
+
+![image.png](attachment:0ca615eb-ae0d-4822-9fc6-5aee0ec2f8d4:image.png)
+
+- `<%= link_to "Edit this user", edit_user_path(@user) %> |`
+
+2つ目の <%= link_to "Edit this user", edit_user_path(@user) %> | の部分ですが、まずは /rails/info/routes
+
+にアクセスした際に表示される表の Helper 列にある edit_user_path の行を見てください。
+
+![image.png](attachment:b737aa8f-95fc-43a5-89b7-dead6be10f53:image.png)
+
+edit_user_path というのが、HTTPメソッドのGETで /users/:id/edit にアクセスした際に users_controller の edit アクションが動くことが分かります。ただし、URLが /users/:id/edit となっており、 :id に値を渡してあげる必要があることが分かります。Ruby on Railsでは対照表のHelperに書かれているヘルパーの引数にレコード情報を含むオブジェクトを渡してあげると、自動的に :id の部分にオブジェクトに含まれているレコードのIDを渡してくれます。つまり、edit_user_path(@user) と記述することで、引数に渡されたユーザーの編集ページへのURLを作ってくれます。
+
+- `<%= button_to "Destroy this user", @user, method: :delete %>`
+
+3つ目の <%= button_to "Destroy this user", @user, method: :delete %> の部分ですが、こちらも基本は2つ目と同様です。先程のようにHelperを使ってURLを指定する方法が多いですが、この記述のようにパスを渡す部分に直接 @user を渡すことでRuby on Railsが自動で @user の中身を確認してUsersテーブルの1レコード情報であると分かると user_path(@user) と同じURLを生成してくれます。
+
+### new・createアクション（コードのみ）
+
+![image.png](attachment:8e46dcb8-305e-4425-b837-aaa9a8f2e4cf:image.png)
+
+users_controllerのnewアクションがルーティングから指示された場合、showアクションと同様にまずはフィルターの実行があるかが参照されます。今回のコードではフィルターは設けられていないので、素直に new アクション内の処理が実行されます。右辺で User.new を実行して Userモデルのインスタンスを作成して、左辺の @user というインスタンス変数に格納しています。
+
+![image.png](attachment:0c64ba52-50ad-4033-8d90-be55cb6bf5be:image.png)
+
+格納された `@user` というインスタンス変数は対応するコントローラーのアクションのビューファイル（app/views/users/new.html.erb）に渡されます。具体的には `<%= render "form", user: @user %>` の部分になります。`render` を使って `'form'` のビューファイル（app/views/users/new.html.erb と同じ階層のディレクトリにある app/views/users/_form.html.erb）内の `user` に `@user` をバケツリレーのように渡しています。
+
+![image.png](attachment:95e9aa17-2d22-4143-88c7-f19ad84cd045:image.png)
+
+![image.png](attachment:854687ad-026c-4b96-a431-494d08e2d642:image.png)
+
+app/views/users/_form.html.erb では、セキュリティ対策などを施した form を作成してくれるヘルパーである `from_with` を使って form を生成しています。`form_with`についてもRails基礎で詳しく触れますが、`form_with`のモデル指定に モデルから生成されたインスタンスのオブジェクトを渡してあげると、`form_with`がそのオブジェクトがデータベースに保存されているかどうかを判断して、フォームの送信先を createアクション・updateアクションのどちらが適切かを判断してリクエストに必要なHTTPメソッドとURLを含んだフォームを作成してくれます。app/views/users/_form.html.erb の`form_with` から end までのブロック内では、`form_with`が用意しているフォームヘルパーを使って入力フォームを生成します。（`<%= form.text_field :name %>`などの部分がそれになります。）
+
+![image.png](attachment:3bbe5856-868e-4b90-88fa-c6cecc739093:image.png)
+
+/users/new ページで入力し、送信すると、form_withで生成されたリクエスト情報がRailsに送られます。Ruby on Railsはそのリクエスト情報からコントローラーとアクションを指示します。今回で言うと users_controller の create アクションが実行されます。
+
+![image.png](attachment:503256bb-97f4-4f84-8683-01d2accc3fc6:image.png)
+
+フォームに入力されたものは、Parameter としてコントローラー・アクションに渡されます。その渡された Parameter の中から必要な値を取り出す際に `params` というメソッドを使います。ただし送られた値を全て許容してしまうと予期せぬエラーが生じてしまうため、`params` メソッドに加えて、`require`メソッドと`permit`メソッドを使って、 Parameter の中から受け取って良いものだけを指定して取得しています。Ruby on Rails のこうした許可する値を指定して取得する仕組みをストロングパラメーターと呼びます。
+
+![image.png](attachment:7c825d21-53fa-452c-8465-4e08231ae940:image.png)
+
+ストロングパラメーターで許可した値を User.new に渡しています。生成されたname, ageに値が入ったインスタンスを、右辺の @user に格納しています。
+
+### edit・updateアクション（コードのみ）
+
+![image.png](attachment:5e168a82-9b72-4111-a48b-1d8738c997dd:image.png)
+
+users_controllerのeditアクションがルーティングが指示された場合、フィルターがないため、editアクションが実行される。`before_action` で`set_user`が実行される。
+`set_user`で定義した`@user=User.find(params[:id])` で特定のユーザーを取得し、現在のユーザーの情報（nameとage）がフォームの初期値として表示される。
+
+![image.png](attachment:80fdec12-c114-42f4-a771-af9b183cfe17:image.png)
+
+![image.png](attachment:80bbf00f-fa6e-4e4b-86d6-9c5ea019e664:image.png)
+
+`render “form”`で共通フォームを呼び出す。入力されたnameとageの値をフォーム上にそれぞれ表示している。~~newアクションで格納された~~フォームには@userの現在の値が初期値として入るようになっている。
+~~~~
+
+![image.png](attachment:290aa0ba-375a-4d00-8d43-f4a1e0c21ae8:image.png)
+
+![image.png](attachment:280f8550-fc42-4131-a488-aea7160a60c2:image.png)
+
+formに入力された`user_params`の値（createメソッドでUser.newで入力した値を@userに代入した値）がupdateメソッドに返され、ストロングパラメータで許可した値をレスポンスしている。
